@@ -15,39 +15,62 @@ router.post("/register-user", async (req, res) => {
     const rePassword = formattedUserName(req.body.rePassword);
     const fields = [username, email, password, rePassword];
     const data = { username, email, password, rePassword };
+    const messages = [];
+    const fieldNames = [];
 
     // if all fields is empty
     const allFieldsEmpty = fields.every((fi) => !fi || fi.trim() === "");
     if (allFieldsEmpty) {
+      messages.push("Please fill in all fields");
+      fieldNames.push("all");
       return res.status(400).json({
         message: "please fill in all fields",
-        fieldName: "all",
+
+        fieldName: fieldNames,
       });
     }
     // if password and rePassword is not match
 
     if (password !== rePassword) {
-      return res.status(400).json({ message: "passwords do not match" });
+      messages.push("Passwords do not match");
+      fieldNames.push("password", "rePassword");
+      return res.status(400).json({ message: messages, fieldName: fieldNames });
     }
 
     for (const [key, value] of Object.entries(data)) {
       if (!value || value.trim() === "") {
-        return res.status(400).json({
-          message: `please fill in ${key}`,
-          fieldName: key,
-        });
+        messages.push(`Please fill ${key}`);
+        fieldNames.push(key);
       }
+    }
+
+    if (messages.length > 0) {
+      return res.status(400).json({
+        messages,
+        fieldNames,
+      });
     }
 
     // find if user is exist
 
-    const existUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-    if (existUser) {
-      return res
-        .status(400)
-        .json({ message: "user is already exist please  try to login" });
+    const usernameExists = await User.findOne({ username });
+    const emailExists = await User.findOne({ email });
+
+    if (usernameExists) {
+      messages.push("Username is already exist");
+      fieldNames.push("username");
+    }
+
+    if (emailExists) {
+      messages.push("Email is already exist");
+      fieldNames.push("email");
+    }
+
+    if (messages.length > 0) {
+      return res.status(400).json({
+        messages,
+        fieldNames,
+      });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
