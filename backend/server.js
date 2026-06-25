@@ -20,6 +20,9 @@ app.use(express.json());
 app.use("/api", GetUsers);
 app.use("/api", registerUser);
 app.use("/api", loginUser);
+app.get("/", (req, res) => {
+  res.send("Hello from the backend!");
+});
 
 app.listen(PORT, () => {
   console.log(`server is running http://localhost:${PORT}`);
