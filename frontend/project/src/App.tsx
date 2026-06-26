@@ -1,13 +1,10 @@
 import "./App.css";
+import RoutesPage from "./pages/Routes/RoutesPage";
 
 function App() {
   return (
     <>
-      <h1>Hello, Vite + TypeScript!</h1>
-      <h1>Hello, Vite + TypeScript!</h1>
-      <h1>Hello, Vite + TypeScript!</h1>
-      <h1>Hello, Vite + TypeScript!</h1>
-      <h1>Hello, Vite + TypeScript!</h1>
+      <RoutesPage />
     </>
   );
 }

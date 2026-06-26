@@ -2,6 +2,7 @@ import express from "express";
 import User from "../../MongoDB/Model/User.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../../JWT/generateToke.js";
+
 const router = express.Router();
 
 router.post("/login-user", async (req, res) => {
@@ -17,17 +18,17 @@ router.post("/login-user", async (req, res) => {
     const messages = [];
     const fieldNames = [];
 
-    // if all fields is empty
+    // if all fields are empty
     const allFieldsEmpty = fields.every((fi) => !fi || fi.trim() === "");
+
     if (allFieldsEmpty) {
-      messages.push("Please fill in all fields");
-      fieldNames.push("all");
       return res.status(400).json({
-        message: "please fill in all fields",
-        fieldName: fieldNames,
+        messages: ["Please fill in all fields"],
+        fieldNames: ["all"],
       });
     }
 
+    // Validate individual fields
     for (const [key, value] of Object.entries(data)) {
       if (!value || value.trim() === "") {
         messages.push(`Please fill ${key}`);
@@ -42,52 +43,56 @@ router.post("/login-user", async (req, res) => {
       });
     }
 
-    // find if user is exist
-
+    // Find user
     const usernameExists = await User.findOne({ username: username });
     const emailExists = await User.findOne({ email: username });
 
     if (username.includes("@")) {
       if (!emailExists) {
         return res.status(400).json({
-          message: "Email is not found",
-          fieldName: "email",
+          messages: ["Email is not found"],
+          fieldNames: ["email"],
         });
       }
     } else {
       if (!usernameExists) {
         return res.status(400).json({
-          message: "Username is not found",
-          fieldName: "username",
+          messages: ["Username is not found"],
+          fieldNames: ["username"],
         });
       }
     }
 
-    if (messages.length > 0) {
-      return res.status(400).json({
-        messages,
-        fieldNames,
-      });
-    }
     const user = usernameExists || emailExists;
-    // ✅ FIX: define password check
+
+    // Check password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    const token = generateToken(user);
+
     if (!isPasswordCorrect) {
       return res.status(400).json({
-        messages: ["password is not correct"],
+        messages: ["Password is not correct"],
         fieldNames: ["password"],
       });
     }
 
-    return res
-      .status(200)
-      .json({ message: "user logged in Successfully", user: user, token });
+    // Generate token
+    const token = generateToken(user);
+
+    // Remove password before sending user
+    const userData = user.toObject();
+    delete userData.password;
+
+    return res.status(200).json({
+      message: "User logged in Successfully",
+      user: userData,
+      token,
+    });
   } catch (error) {
     return res.status(500).json({
-      message: "error with login user method",
+      message: "Error with login user method",
       error: error.message,
     });
   }
 });
+
 export default router;
