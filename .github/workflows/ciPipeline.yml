@@ -32,6 +32,8 @@ jobs:
       - name: Build Frontend
         working-directory: frontend/project
         run: npm run build
+      - name: Build Frontend Docker Image
+        run: docker build -t frontend-image ./frontend/project
 
       # Backend
       - name: Install Backend Dependencies
@@ -41,6 +43,12 @@ jobs:
       - name: Build Backend
         working-directory: backend
         run: npm run build
+
+      - name: Build Backend Docker Image
+        run: docker build -t backend-image ./backend
+
+      - name: List Docker Images
+        run: docker images
 
       - name: CI Success
         run: echo "🎉 Frontend and Backend built successfully!"
