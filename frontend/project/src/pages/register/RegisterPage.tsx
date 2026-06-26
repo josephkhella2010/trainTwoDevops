@@ -1,70 +1,73 @@
 import { useState } from "react";
-import { loginInputs } from "../../utilities/Arrays";
-import type { LoginUserType } from "../../utilities/Interfaces";
+import { registerInputs } from "../../utilities/Arrays";
+import type { RegisterUserType } from "../../utilities/Interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 
-export default function LoginPage() {
-  const [inpValues, setInpValues] = useState<LoginUserType>({
+export default function RegisterPage() {
+  const [inpValues, setInpValues] = useState<RegisterUserType>({
     username: "",
+    email: "",
     password: "",
+    rePassword: "",
   });
-  const { token, user } = useSelector((state: RootState) => state.usersSlice);
-  const { fields } = useSelector((state: RootState) => state.loadingSlice);
-  const dispatch = useDispatch();
-  /*  function*/
-  console.log("token", token);
-  console.log("user", user);
-  console.log("fields", fields);
 
-  const handleChangeInput = (
+  const { fields } = useSelector((state: RootState) => state.loadingSlice);
+  console.log("fields", fields);
+  const dispatch = useDispatch();
+  /* function */
+  const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     name: string,
   ) => {
     const { value } = e.target;
     setInpValues((prev) => ({ ...prev, [name]: value }));
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+  const handleForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(inpValues);
-    const user = {
+    const newUser = {
       username: inpValues.username,
+      email: inpValues.email,
       password: inpValues.password,
+      rePassword: inpValues.rePassword,
     };
-    dispatch({ type: "Fetch-LOGIN-USERS", payload: user });
+    dispatch({ type: "Fetch-REGISTER-USERS", payload: newUser });
   };
 
   /*  */
+
   return (
     <div>
-      <h1> LoginPage</h1>
-      <form onSubmit={handleSubmit}>
+      <h1>Register</h1>
+
+      <form onSubmit={handleForm}>
         <div>
-          {loginInputs &&
-            loginInputs.map((inp, index) => {
+          {registerInputs &&
+            registerInputs.map((inp, index) => {
               return (
                 <label htmlFor={inp.name} key={index}>
-                  <p>{inp.name}</p>
+                  <p>{inp.label}</p>
+
                   <input
                     type={inp.type}
-                    placeholder={inp.placeholder}
                     name={inp.name}
-                    value={inpValues[inp.name as keyof LoginUserType]}
-                    onChange={(e) => {
-                      handleChangeInput(e, inp.name);
-                    }}
+                    id={inp.name}
+                    placeholder={inp.placeholder}
+                    value={inpValues[inp.name as keyof RegisterUserType]}
+                    onChange={(e) => handleInputChange(e, inp.name)}
                     style={{
                       border:
                         fields.includes(inp.name) || fields.includes("all")
                           ? "2px solid red"
-                          : "0.5px solid black",
+                          : "1px solid black",
                     }}
                   />
                 </label>
               );
             })}
         </div>
-        <button type="submit"> Login</button>
+        <button type="submit">Register</button>
       </form>
     </div>
   );

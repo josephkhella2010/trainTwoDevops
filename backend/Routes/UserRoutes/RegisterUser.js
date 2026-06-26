@@ -21,20 +21,18 @@ router.post("/register-user", async (req, res) => {
     // if all fields is empty
     const allFieldsEmpty = fields.every((fi) => !fi || fi.trim() === "");
     if (allFieldsEmpty) {
-      messages.push("Please fill in all fields");
-      fieldNames.push("all");
       return res.status(400).json({
-        message: "please fill in all fields",
-
-        fieldName: fieldNames,
+        messages: ["Please fill in all fields"],
+        fieldNames: ["all"],
       });
     }
     // if password and rePassword is not match
 
     if (password !== rePassword) {
-      messages.push("Passwords do not match");
-      fieldNames.push("password", "rePassword");
-      return res.status(400).json({ message: messages, fieldName: fieldNames });
+      return res.status(400).json({
+        messages: ["Passwords do not match"],
+        fieldNames: ["password", "rePassword"],
+      });
     }
 
     for (const [key, value] of Object.entries(data)) {
